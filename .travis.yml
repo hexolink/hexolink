@@ -1,0 +1,34 @@
+sudo: required
+services:
+  - docker
+language: generic
+branches:
+  only:
+    - master
+env:
+  global:
+    - SHA=$(git rev-parse HEAD)
+    - CLOUDSDK_CORE_DISABLE_PROMPTS=1
+before_install:
+  - openssl aes-256-cbc -K $encrypted_9f3b5599b056_key -iv $encrypted_9f3b5599b056_iv -in service-account.json.enc -out service-account.json -d
+  - curl https://sdk.cloud.google.com | bash > /dev/null;
+  - source $HOME/google-cloud-sdk/path.bash.inc
+  - gcloud components update kubectl
+  - gcloud auth activate-service-account --key-file service-account.json
+  - gcloud config set project thehexolink-353317
+  - gcloud config set compute/zone europe-central2-a
+  - gcloud container clusters get-credentials thehexolink
+script:
+  - mvn clean package
+
+#для сборки самого проекта, каждый сервис собирается
+#по отдельности, для пуша на докер хаб
+after_success:
+  - docker build -t noxior/authentication-service:latest -t noxior/authentication-service:$SHA -f ./authentication-service/Dockerfile ./authentication-service
+    #как раз место для пуша на докер хаб
+    #login в докер хабе
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+  - docker push noxior/authentication-service:latest
+  - docker push noxior/authentication-service:$SHA
+  - kubectl apply -f k8s
+  - kubectl set image deployment/authentication-service-deployment authentication-service=noxior/authentication-service:$SHA

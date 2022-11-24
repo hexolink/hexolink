@@ -1,0 +1,13 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: hexolink-xyz-tls
+spec:
+  secretName: hexolink-xyz
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+  commonName: hexolink.xyz
+  dnsNames:
+    - hexolink.xyz
+    - www.hexolink.xyz

@@ -1,0 +1,23 @@
+server:
+  servlet:
+    context-path: /uaa
+  port: 3000
+  ssl:
+    enabled: false
+
+spring:
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: create-drop
+    database-platform: org.hibernate.dialect.PostgreSQL94Dialect
+    open-in-view: false
+  datasource:
+    url: jdbc:postgresql://${PGHOST}:${PGPORT}/${PGDATABASE}
+    username: ${PGUSER}
+    password: ${POSTGRES_PASSWORD}
+logging:
+  level:
+    root: debug
+    web: debug
+
